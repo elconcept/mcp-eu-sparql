@@ -31,3 +31,12 @@ jobs:
 
       - name: Descriptor lock (tools/list vs test/tools.lock.json)
         run: npm run test:descriptors
+
+      # drift + offline nie byly uruchamiane w CI (do 2026-10-13)
+      - name: Drift + offline tests
+        run: npm test
+
+      - name: Package gate (runtime files in npm pack)
+        run: |
+          npm run test:package-gate
+          npm run test:package

@@ -3,6 +3,29 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) +
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-13
+
+Aktualizacja zaleznosci (bezpieczenstwo) i bramki przed publikacja. Bez zmian w kodzie serwera i w
+kontrakcie narzedzi (descriptor lock bez zmian; zywy smoke 5/5 narzedzi na EUR-Lex i GDPRhub).
+
+### Security
+
+- `npm audit`: 9 doradztw (1 krytyczne, 4 wysokie, 2 srednie, 2 niskie) -> 0. Zadna paczka nie doszla
+  ani nie zniknela (porownanie zbiorow z lockfile'a); runtime: `@modelcontextprotocol/sdk` 1.29.0 ->
+  1.32.1 (i jego zaleznosci HTTP: hono, `@hono/node-server` 1.x -> 2.x zgodnie z deklaracja SDK,
+  proxy-addr, qs, ip-address, body-parser, fast-uri); dev: esbuild 0.28.0 -> 0.28.2.
+- Ekspozycja przed poprawka (zderzone z kodem): serwer uzywa wylacznie `StdioServerTransport` -
+  zaleznosci transportow HTTP SDK nie sa ladowane; doradztwo SDK dotyczy KLIENTA OAuth; esbuild to
+  narzedzie deweloperskie (dev server). Realna ekspozycja bliska zera - aktualizacja, bo tania.
+- `release.yml`: krok czekajacy na widocznosc wersji na npm przed rejestracja w MCP Registry
+  (wyscig zmierzony przy mcp-krs 1.1.2).
+
+### Added
+
+- `release.yml`: krok "Run gates before publishing" (`npm test` = drift + offline, descriptor lock, bramka paczki) - do tej pory wydanie szlo `npm ci -> build -> publish` bez zadnego testu.
+- `ci.yml`: `npm test` (drift + offline nie byly uruchamiane w CI) i bramka paczki.
+- Bramka paczki `npm run test:package` (`npm pack --dry-run --json`; wymagane pliki wyprowadzone z `bin`/`main` + przechodnich `require`/`import` w `dist/`, pusta lista = BLOKADA; wzorzec soba-labs/krs-mcp #7) + kontrola pozytywna `npm run test:package-gate`. Mutant (usuniety `dist/queries.js`) -> BLOKADA, exit 1.
+
 ## [1.2.0] — 2026-07-08
 
 Widen-round: pelne orzecznictwo CJEU przez istniejacy klient Cellar SPARQL + GDPRhub (decyzje krajowych DPA). **Backward-compatible**.
