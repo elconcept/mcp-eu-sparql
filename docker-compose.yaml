@@ -1,0 +1,26 @@
+# mcp-eu-sparql - prawo UE i TSUE (SPARQL Cellar, GDPRhub) (stdio z repo -> supergateway, Streamable HTTP /mcp, port 8000). Stack Portainera "mcp-eu-sparql".
+# Bez portu na hoscie. Dostep wylacznie: https://mcp-eu-sparql.xlap.pl/mcp - tunel cloudflared, bez Access (publiczny,
+# bezstanowy - konektory claude.ai/ChatGPT). cf_mcp_eu_sparql: cloudflared + ten serwis, z wyjsciem do internetu.
+# Przebudowa po pushu na main: deploy-hook (.github/workflows/deploy.yml).
+services:
+  mcp-eu-sparql:
+    build:
+      context: /volume2/docker/mcp-eu-sparql
+      dockerfile: Dockerfile.nas
+    image: mcp-eu-sparql:latest
+    container_name: mcp-eu-sparql
+    user: "1029:100"
+    environment:
+      - TZ=Europe/Warsaw
+    networks:
+      - cf_mcp_eu_sparql
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  cf_mcp_eu_sparql:
+    external: true
