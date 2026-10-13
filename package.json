@@ -12,7 +12,9 @@
     "drift": "node test/drift.mjs",
     "test:offline": "node test/offline.mjs",
     "smoke": "node test/smoke.mjs",
-    "test": "npm run drift && npm run test:offline"
+    "test": "npm run drift && npm run test:offline",
+    "test:package": "node test/package-gate.mjs",
+    "test:package-gate": "node --test test/package-gate.test.mjs"
   },
   "keywords": [
     "mcp",

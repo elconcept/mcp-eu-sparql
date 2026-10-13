@@ -40,6 +40,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Do 2026-10-13 wydanie szlo `npm ci -> build -> publish` bez zadnego testu (cala flota TS;
+      # ta sama klasa co flota Pythonowa 2026-08-24). Smoke (zywy EUR-Lex) celowo poza wydaniem.
+      - name: Run gates before publishing
+        run: |
+          npm test
+          npm run test:descriptors
+          npm run test:package-gate
+          npm run test:package
+
       # 2026-07-10: reverted to granular NPM_TOKEN (org secret refreshed with a
       # 2FA-bypass token scoped to the matematicsolutions org). --provenance
       # dropped: a `npm install -g npm@latest` step corrupted the bundled

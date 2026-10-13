@@ -3,6 +3,17 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) +
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Bramki przed publikacja (2026-10-13). Bez zmian w kodzie serwera i w kontrakcie narzedzi - wydanie
+tylko po to, zeby zaczely dzialac kroki w workflow (workflow nie jest czescia paczki).
+
+### Added
+
+- `release.yml`: krok "Run gates before publishing" (`npm test` = drift + offline, descriptor lock, bramka paczki) - do tej pory wydanie szlo `npm ci -> build -> publish` bez zadnego testu.
+- `ci.yml`: `npm test` (drift + offline nie byly uruchamiane w CI) i bramka paczki.
+- Bramka paczki `npm run test:package` (`npm pack --dry-run --json`; wymagane pliki wyprowadzone z `bin`/`main` + przechodnich `require`/`import` w `dist/`, pusta lista = BLOKADA; wzorzec soba-labs/krs-mcp #7) + kontrola pozytywna `npm run test:package-gate`. Mutant (usuniety `dist/queries.js`) -> BLOKADA, exit 1.
+
 ## [1.2.0] — 2026-07-08
 
 Widen-round: pelne orzecznictwo CJEU przez istniejacy klient Cellar SPARQL + GDPRhub (decyzje krajowych DPA). **Backward-compatible**.
