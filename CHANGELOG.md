@@ -3,10 +3,22 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) +
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.1] - 2026-10-13
 
-Bramki przed publikacja (2026-10-13). Bez zmian w kodzie serwera i w kontrakcie narzedzi - wydanie
-tylko po to, zeby zaczely dzialac kroki w workflow (workflow nie jest czescia paczki).
+Aktualizacja zaleznosci (bezpieczenstwo) i bramki przed publikacja. Bez zmian w kodzie serwera i w
+kontrakcie narzedzi (descriptor lock bez zmian; zywy smoke 5/5 narzedzi na EUR-Lex i GDPRhub).
+
+### Security
+
+- `npm audit`: 9 doradztw (1 krytyczne, 4 wysokie, 2 srednie, 2 niskie) -> 0. Zadna paczka nie doszla
+  ani nie zniknela (porownanie zbiorow z lockfile'a); runtime: `@modelcontextprotocol/sdk` 1.29.0 ->
+  1.32.1 (i jego zaleznosci HTTP: hono, `@hono/node-server` 1.x -> 2.x zgodnie z deklaracja SDK,
+  proxy-addr, qs, ip-address, body-parser, fast-uri); dev: esbuild 0.28.0 -> 0.28.2.
+- Ekspozycja przed poprawka (zderzone z kodem): serwer uzywa wylacznie `StdioServerTransport` -
+  zaleznosci transportow HTTP SDK nie sa ladowane; doradztwo SDK dotyczy KLIENTA OAuth; esbuild to
+  narzedzie deweloperskie (dev server). Realna ekspozycja bliska zera - aktualizacja, bo tania.
+- `release.yml`: krok czekajacy na widocznosc wersji na npm przed rejestracja w MCP Registry
+  (wyscig zmierzony przy mcp-krs 1.1.2).
 
 ### Added
 

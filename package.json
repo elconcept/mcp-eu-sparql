@@ -1,6 +1,6 @@
 {
   "name": "@matematicsolutions/mcp-eu-sparql",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server - EU legislation and CJEU case law via Publications Office SPARQL (Cellar / EUR-Lex)",
   "main": "dist/index.js",
   "scripts": {

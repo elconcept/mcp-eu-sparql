@@ -354,7 +354,7 @@ function errorResult(text: string, code: ErrorCode) {
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const server = new Server(
-    { name: "mcp-eu-sparql", version: "1.2.0" },
+    { name: "mcp-eu-sparql", version: "1.2.1" },
     { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
 );
 
