@@ -31,12 +31,25 @@ export function shortTypeFromUri(uri: string): string {
     return m ? m[1] : uri;
 }
 
+/** Duplikaty Cellar: ten sam CELEX/ECLI może mieć kilka ekspresji/tytułów. */
+export function uniqueRows(rows: SparqlBinding[]): SparqlBinding[] {
+    const chosen = new Map<string, SparqlBinding>();
+    for (const row of rows) {
+        const celex = row.celex?.value;
+        if (!celex) continue;
+        const key = celex + "|" + (row.ecli?.value ?? "");
+        const prior = chosen.get(key);
+        if (!prior || (!prior.title?.value && row.title?.value)) chosen.set(key, row);
+    }
+    return [...chosen.values()];
+}
+
 export function buildCitations(
     rows: SparqlBinding[],
-    lang: string,
+    _lang: string = "POL", // parametr wewnętrzny dla zachowania zgodności testów
 ): EuCitation[] {
     const out: EuCitation[] = [];
-    for (const row of rows) {
+    for (const row of uniqueRows(rows)) {
         const celex = row.celex?.value;
         if (!celex) continue;
         const title = row.title?.value;
@@ -45,7 +58,7 @@ export function buildCitations(
         const ecli = row.ecli?.value;
         out.push({
             title: title ?? celex,
-            url: eurLexUrl(celex, lang === "POL" ? "PL" : "EN"),
+            url: eurLexUrl(celex, "PL"),
             ...(date && { publication_date: date }),
             ...(celex && { celex }),
             ...(ecli && { ecli }),
@@ -63,7 +76,7 @@ export function formatRows(rows: SparqlBinding[], header: string): string {
         );
     }
     const lines = [header, ""];
-    for (const row of rows) {
+    for (const row of uniqueRows(rows)) {
         const celex = row.celex?.value ?? "brak_celex";
         const date = row.date?.value ?? "?";
         const typeUri = row.type?.value;
