@@ -137,7 +137,7 @@ const INSTRUCTIONS = `Ten serwer MCP odpytuje oficjalny endpoint SPARQL Publicat
 ## Twarde ograniczenia
 
 - **CELEX/ECLI kluczowe dla cytowalnosci** - odpowiedzi Cellar zawieraja CELEX (i ECLI dla case-law) w \`structuredContent.citations\`. Bez identyfikatora brak cytowalnosci.
-- **Wielojezycznosc 24 jezyki UE** - default jezyk POL. Parametr \`lang\` (POL/ENG/FRA/DEU). Polskie tytuly nie zawsze sa - fallback na ENG dla CJEU jesli brak.
+- **Wyłącznie język polski** – bez selektora języka. Pobieraj polskie tytuły przez Cellar (POL) i linkuj do polskiej wersji EUR-Lex (PL). Przy braku tytułu PL wskaż brak, bez cichego fallbacku EN.
 - **Stateless** - kazde wywolanie idzie do zrodla live. NIE cachuj wynikow (akty konsoliduja sie / status sie zmienia).
 - **Bez scrapingu** - Cellar przez oficjalny SPARQL endpoint, GDPRhub przez oficjalne API MediaWiki.
 - **\`structuredContent.citations\`**: title, url, celex?, ecli?, publication_date?, document_type?, snippet?, license?. Cytuj te citations w odpowiedzi koncowej.
@@ -156,7 +156,7 @@ Tool zwraca \`isError: true\` + tekst z prefixem \`[code]\`. Typowe kody:
 - Dla CJEU: "Wyrok C-311/18 Schrems II (62018CJ0311, ECLI:EU:C:2020:559) z dnia 16.07.2020".
 - Dla GDPRhub: tytul strony + URL + adnotacja o licencji CC BY-NC-SA 4.0.
 - NIE wymyslaj CELEX-ow, ECLI ani dat - wszystko z \`structuredContent.citations\`.
-- Disclaimer wielojezycznosci: jesli zwracasz angielskie tytuly dla aktow ktore powinny miec PL, oznacz to.`;
+- Brak urzędowej wersji PL trzeba wyraźnie oznaczyć; nie przedstawiaj tłumaczenia jako tekstu urzędowego.`;
 
 // ---------------------------------------------------------------------------
 // Tool definitions
@@ -177,19 +177,13 @@ const TOOLS = [
             "Znajdz akt prawny UE lub orzeczenie CJEU po numerze CELEX. " +
             "Numer CELEX jest unikalny i identyfikuje dokument niezaleznie od jezyka. " +
             "Przyklady: 32016R0679 (RODO), 31995L0046 (uchylona dyrektywa o ochronie danych), " +
-            "62018CJ0311 (wyrok Schrems II). Zwraca tytul w wybranym jezyku, ECLI (dla case-law) i EUR-Lex URL.",
+            "62018CJ0311 (wyrok Schrems II). Zwraca polski tytuł (jeśli dostępny), ECLI (dla orzeczeń) i polski adres EUR-Lex.",
         inputSchema: {
             type: "object",
             properties: {
                 celex: {
                     type: "string",
                     description: "Numer CELEX, np. '32016R0679' (RODO).",
-                },
-                lang: {
-                    type: "string",
-                    description:
-                        "ISO 639-3 jezyka tytulu (POL/ENG/FRA/DEU). Domyslnie POL.",
-                    enum: ["POL", "ENG", "FRA", "DEU"],
                 },
             },
             required: ["celex"],
@@ -220,12 +214,6 @@ const TOOLS = [
                         "Skrot typu aktu: REG, DIR, DEC, RECO, OPIN. Pomin zeby objac wszystkie.",
                     enum: ["REG", "DIR", "DEC", "RECO", "OPIN"],
                 },
-                lang: {
-                    type: "string",
-                    description:
-                        "ISO 639-3 jezyka tytulow. Domyslnie POL.",
-                    enum: ["POL", "ENG", "FRA", "DEU"],
-                },
                 limit: {
                     type: "number",
                     description:
@@ -245,7 +233,7 @@ const TOOLS = [
             "postanowienia (ORDER) i opinie rzecznikow generalnych (OPIN_AG). " +
             "Opcjonalnie zawez do zakresu dat, typu dokumentu i keyworda w tytule " +
             "(tytul CJEU zawiera strony sprawy, sygnature i slowa kluczowe wyroku). " +
-            "Zwraca CELEX (np. 62018CJ0311), ECLI, date wydania, tytul (jezyk wg lang) i EUR-Lex URL.",
+            "Zwraca CELEX (np. 62018CJ0311), ECLI, datę wydania, polski tytuł (jeśli dostępny) i adres EUR-Lex PL.",
         inputSchema: {
             type: "object",
             properties: {
@@ -267,11 +255,6 @@ const TOOLS = [
                     description:
                         "Typ dokumentu: JUDG=wyrok, ORDER=postanowienie, OPIN_AG=opinia rzecznika generalnego. Pomin zeby objac wszystkie trzy.",
                     enum: ["JUDG", "ORDER", "OPIN_AG"],
-                },
-                lang: {
-                    type: "string",
-                    description: "ISO 639-3 jezyka tytulow. Domyslnie POL.",
-                    enum: ["POL", "ENG", "FRA", "DEU"],
                 },
                 limit: {
                     type: "number",
@@ -298,11 +281,6 @@ const TOOLS = [
                     type: "string",
                     description:
                         "Identyfikator ECLI orzeczenia CJEU, np. 'ECLI:EU:C:2020:559'.",
-                },
-                lang: {
-                    type: "string",
-                    description: "ISO 639-3 jezyka tytulu. Domyslnie POL.",
-                    enum: ["POL", "ENG", "FRA", "DEU"],
                 },
             },
             required: ["ecli"],
@@ -370,7 +348,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     const a = (args ?? {}) as Record<string, unknown>;
-    const lang = typeof a.lang === "string" ? a.lang : "POL";
+    // Starszy parametr a.lang ignorujemy – interfejs nie pozwala wybrać języka.
+    const lang = "POL";
 
     try {
         switch (name) {
@@ -383,7 +362,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 const rows = data.results.bindings;
                 const text = formatRows(
                     rows,
-                    `Wynik search_by_celex(celex="${a.celex}", lang=${lang}):`,
+                    `Wynik wyszukiwania CELEX "${a.celex}":`,
                 );
                 return {
                     content: [{ type: "text", text }],
@@ -434,7 +413,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 const rows = data.results.bindings;
                 const text = formatRows(
                     rows,
-                    `Wynik search_by_date_range(${dateFrom}..${dateTo}, type=${typeShort ?? "ALL"}, lang=${lang}):`,
+                    `Wynik wyszukiwania aktów (${dateFrom}–${dateTo}, typ=${typeShort ?? "wszystkie"}):`,
                 );
                 return {
                     content: [{ type: "text", text }],
@@ -489,7 +468,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 const rows = data.results.bindings;
                 const text = formatRows(
                     rows,
-                    `Wynik search_cjeu(${dateFrom ?? "*"}..${dateTo ?? "*"}, type=${docType ?? "ALL"}, query=${keyword ?? "-"}, lang=${lang}):`,
+                    `Wynik wyszukiwania TSUE (${dateFrom ?? "*"}–${dateTo ?? "*"}, typ=${docType ?? "wszystkie"}, fraza=${keyword ?? "-"}):`,
                 );
                 return {
                     content: [{ type: "text", text }],
@@ -517,7 +496,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 }
                 const text = formatRows(
                     rows,
-                    `Wynik search_cjeu_by_ecli(ecli="${a.ecli}", lang=${lang}):`,
+                    `Wynik wyszukiwania ECLI "${a.ecli}":`,
                 );
                 return {
                     content: [{ type: "text", text }],

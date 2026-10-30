@@ -11,6 +11,7 @@ import {
     CJEU_TYPES,
     RESOURCE_TYPES,
     searchByCelexQuery,
+    searchByDateRangeQuery,
     searchCjeuByEcliQuery,
     searchCjeuQuery,
 } from "../dist/queries.js";
@@ -19,6 +20,7 @@ import {
     buildGdprhubCitations,
     formatGdprhubRows,
     formatRows,
+    uniqueRows,
     GDPRHUB_LICENSE,
     gdprhubPageUrl,
 } from "../dist/format.js";
@@ -94,6 +96,7 @@ test("buildCitations: Schrems II fixture -> CELEX + ECLI + data + typ", () => {
     assert.equal(c.document_type, "JUDG");
     assert.ok(c.title.includes("Schrems"));
     assert.ok(c.url.includes("CELEX%3A62018CJ0311") || c.url.includes("CELEX:62018CJ0311"));
+    assert.ok(c.url.includes("/legal-content/PL/TXT/"));
 });
 
 test("formatRows: ECLI widoczne w tekscie dla czlowieka", () => {
@@ -101,6 +104,20 @@ test("formatRows: ECLI widoczne w tekscie dla czlowieka", () => {
     const text = formatRows(data.results.bindings, "naglowek:");
     assert.ok(text.includes("ECLI : ECLI:EU:C:2020:559"));
     assert.ok(text.includes("CELEX: 62018CJ0311"));
+});
+
+test("uniqueRows: jeden CELEX/ECLI i zachowanie tytułu", () => {
+    const rows = [
+        { celex: { type: "literal", value: "62018CJ0311" }, ecli: { type: "literal", value: "ECLI:EU:C:2020:559" } },
+        { celex: { type: "literal", value: "62018CJ0311" }, ecli: { type: "literal", value: "ECLI:EU:C:2020:559" }, title: { type: "literal", value: "Wyrok TSUE" } },
+    ];
+    assert.equal(uniqueRows(rows).length, 1);
+    assert.equal(buildCitations(rows, "ENG")[0].title, "Wyrok TSUE");
+});
+
+test("date_range REG: wybrany typ musi odpowiadać ?type", () => {
+    const query = searchByDateRangeQuery("2024-08-01", "2024-08-07", RESOURCE_TYPES.REG, "POL", 2);
+    assert.ok(query.includes(`FILTER(?type = <${RESOURCE_TYPES.REG}>)`));
 });
 
 // --- parsowanie GDPRhub (fixture: search Schrems) --------------------------
