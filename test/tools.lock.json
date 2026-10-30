@@ -1,9 +1,9 @@
 {
-  "package_version": "1.2.0",
-  "toolset_sha256": "7f63664ceff9c5acc15dd9e88d5fcf8e196e8d1d4d217a6b155cd202cb8e9ba4",
+  "package_version": "1.2.2",
+  "toolset_sha256": "592ebe0ab9cc2c841e76e8a9fdcb1f7ae6e114afbf58cdd0ddc650ba650168c7",
   "tools": {
     "search_by_celex": {
-      "sha256": "b8660940b80ac62aa3520fc17523758afcd835da47692cddbcd5fbbf24e02f6c",
+      "sha256": "e6c1c1e2aa8be3fb55154fcac8063bfe825da61e9c1b4c2f49014830215e1b95",
       "descriptor": {
         "annotations": {
           "destructiveHint": false,
@@ -11,21 +11,11 @@
           "openWorldHint": true,
           "readOnlyHint": true
         },
-        "description": "Znajdz akt prawny UE lub orzeczenie CJEU po numerze CELEX. Numer CELEX jest unikalny i identyfikuje dokument niezaleznie od jezyka. Przyklady: 32016R0679 (RODO), 31995L0046 (uchylona dyrektywa o ochronie danych), 62018CJ0311 (wyrok Schrems II). Zwraca tytul w wybranym jezyku, ECLI (dla case-law) i EUR-Lex URL.",
+        "description": "Znajdz akt prawny UE lub orzeczenie CJEU po numerze CELEX. Numer CELEX jest unikalny i identyfikuje dokument niezaleznie od jezyka. Przyklady: 32016R0679 (RODO), 31995L0046 (uchylona dyrektywa o ochronie danych), 62018CJ0311 (wyrok Schrems II). Zwraca polski tytuł (jeśli dostępny), ECLI (dla orzeczeń) i polski adres EUR-Lex.",
         "inputSchema": {
           "properties": {
             "celex": {
               "description": "Numer CELEX, np. '32016R0679' (RODO).",
-              "type": "string"
-            },
-            "lang": {
-              "description": "ISO 639-3 jezyka tytulu (POL/ENG/FRA/DEU). Domyslnie POL.",
-              "enum": [
-                "POL",
-                "ENG",
-                "FRA",
-                "DEU"
-              ],
               "type": "string"
             }
           },
@@ -38,7 +28,7 @@
       }
     },
     "search_by_date_range": {
-      "sha256": "5c20c45e9711e207bc2980eed01edecf690bacbda236553f1c503e84777f2681",
+      "sha256": "7486476f5d7c8e6ad738647631fe82ddbce9ef90b60f9f20f04758d2ec6654a1",
       "descriptor": {
         "annotations": {
           "destructiveHint": false,
@@ -68,16 +58,6 @@
               ],
               "type": "string"
             },
-            "lang": {
-              "description": "ISO 639-3 jezyka tytulow. Domyslnie POL.",
-              "enum": [
-                "POL",
-                "ENG",
-                "FRA",
-                "DEU"
-              ],
-              "type": "string"
-            },
             "limit": {
               "description": "Maks. liczba wynikow (1-50). Domyslnie 20.",
               "maximum": 50,
@@ -95,7 +75,7 @@
       }
     },
     "search_cjeu": {
-      "sha256": "1c81cf0790dc6069c4c04ceb67ff9c603cd6ee144806805ade5670e7df443860",
+      "sha256": "e8782fe47ff20cabcaab88ef91383c54bb6c8139c9bf0b7865193b9881367ab2",
       "descriptor": {
         "annotations": {
           "destructiveHint": false,
@@ -103,7 +83,7 @@
           "openWorldHint": true,
           "readOnlyHint": true
         },
-        "description": "Wyszukaj orzecznictwo Trybunalu Sprawiedliwosci UE (CJEU): wyroki (JUDG), postanowienia (ORDER) i opinie rzecznikow generalnych (OPIN_AG). Opcjonalnie zawez do zakresu dat, typu dokumentu i keyworda w tytule (tytul CJEU zawiera strony sprawy, sygnature i slowa kluczowe wyroku). Zwraca CELEX (np. 62018CJ0311), ECLI, date wydania, tytul (jezyk wg lang) i EUR-Lex URL.",
+        "description": "Wyszukaj orzecznictwo Trybunalu Sprawiedliwosci UE (CJEU): wyroki (JUDG), postanowienia (ORDER) i opinie rzecznikow generalnych (OPIN_AG). Opcjonalnie zawez do zakresu dat, typu dokumentu i keyworda w tytule (tytul CJEU zawiera strony sprawy, sygnature i slowa kluczowe wyroku). Zwraca CELEX (np. 62018CJ0311), ECLI, datę wydania, polski tytuł (jeśli dostępny) i adres EUR-Lex PL.",
         "inputSchema": {
           "properties": {
             "date_from": {
@@ -120,16 +100,6 @@
                 "JUDG",
                 "ORDER",
                 "OPIN_AG"
-              ],
-              "type": "string"
-            },
-            "lang": {
-              "description": "ISO 639-3 jezyka tytulow. Domyslnie POL.",
-              "enum": [
-                "POL",
-                "ENG",
-                "FRA",
-                "DEU"
               ],
               "type": "string"
             },
@@ -151,7 +121,7 @@
       }
     },
     "search_cjeu_by_ecli": {
-      "sha256": "79d8f34d841104ec694020b55288f1186f428b0cd4d034a04337b9c7a429fe73",
+      "sha256": "124c788ec00dad9496313cb3f3deac406b14489697c0a1009caeef790bb7b9b4",
       "descriptor": {
         "annotations": {
           "destructiveHint": false,
@@ -164,16 +134,6 @@
           "properties": {
             "ecli": {
               "description": "Identyfikator ECLI orzeczenia CJEU, np. 'ECLI:EU:C:2020:559'.",
-              "type": "string"
-            },
-            "lang": {
-              "description": "ISO 639-3 jezyka tytulu. Domyslnie POL.",
-              "enum": [
-                "POL",
-                "ENG",
-                "FRA",
-                "DEU"
-              ],
               "type": "string"
             }
           },
