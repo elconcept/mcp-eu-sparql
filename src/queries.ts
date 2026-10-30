@@ -62,8 +62,10 @@ export function searchByDateRangeQuery(
     const safeFrom = sparqlEscape(dateFrom);
     const safeTo = sparqlEscape(dateTo);
     const safeLang = sparqlEscape(lang);
+    // Dla wielu typów jednego work wybierz dokładnie żądany ?type.
     const typeFilter = typeUri
-        ? `?work cdm:work_has_resource-type <${typeUri}> .`
+        ? `?work cdm:work_has_resource-type <${typeUri}> .
+  FILTER(?type = <${typeUri}>)`
         : "";
     return `${PREFIXES}
 SELECT DISTINCT ?work ?celex ?date ?type ?title
